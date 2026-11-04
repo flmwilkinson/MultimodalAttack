@@ -1,0 +1,35 @@
+[
+  {
+    "name": "owned-base",
+    "model_name": "qwen3-vl:30b-a3b-instruct",
+    "kind": "owned",
+    "is_defended": false,
+    "system_prompt": null,
+    "temperature": 0.2,
+    "max_tokens": 512,
+    "enabled": true,
+    "_comment": "Your model with NO guardrail. The undefended baseline for the delta."
+  },
+  {
+    "name": "owned-defended",
+    "model_name": "qwen3-vl:30b-a3b-instruct",
+    "kind": "owned",
+    "is_defended": true,
+    "system_prompt": "PASTE YOUR GUARDRAIL / DEFENSE SYSTEM PROMPT HERE, or point model_name at your already-defended endpoint instead.",
+    "temperature": 0.2,
+    "max_tokens": 512,
+    "enabled": true,
+    "_comment": "Same model WITH your defense. Compared against owned-base to prove the guardrail's contribution."
+  },
+  {
+    "name": "thirdparty-api",
+    "model_name": "openai/gpt-4o-mini",
+    "kind": "thirdparty",
+    "is_defended": true,
+    "system_prompt": null,
+    "temperature": 0.2,
+    "max_tokens": 512,
+    "enabled": false,
+    "_comment": "A black-box API you only consume (its own built-in safety). Enable to include it as an absolute-ASR reference point. No undefended toggle is possible for third-party services."
+  }
+]

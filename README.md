@@ -16,6 +16,15 @@ We propose COMET (Cross-Modal Entanglement Attack), a scalable approach that ext
 
 Disclaimer: This study contains AI-generated content that may be offensive.
 
+> **Evaluation-integrity note (added 2026-11-01).** The "over 94% ASR" figure above is the
+> original authors' *claim* and is **not** a number produced by this repo's default scorer as
+> shipped. The StrongREJECT scorer here previously counted several non-measurements (judge
+> refusing to grade, unparseable judge output, no judge reply, scoring exceptions) as
+> successes, biasing ASR upward. That has been corrected — see **`AUDIT_NOTES.md`**. Any ASR
+> you cite from this tool must be reported with its judge model/temperature, retry policy
+> (best-of-N vs single-shot), success definition, and the `indeterminate_rate` of the run.
+> Background: `../literature/03-evaluation-and-judges.md`.
+
 ## Features
 - Scalable cross-modal entanglement attack pipeline for VLMs
 - Modular components: entity extraction, text redaction/rewriting, payload assembly, VLM recognition
@@ -51,6 +60,39 @@ python main.py --mode batch --input data/SafeBench-One.txt --output logs/attack_
 
 ## Some results are stored in
 logs/attack_run4/query_1_20261027_230143
+
+## Robustness evaluation (for a defensibility / CRO report)
+
+`process_utils/robustness_eval.py` is a **measurement** harness that answers "is the deployment
+robust to the known multimodal attack taxonomy, and how much does our guardrail buy us?" It runs
+a fixed attack battery you supply against one or more targets (owned, with the defense off and
+on; and/or a third-party API), scores every response with the strict StrongREJECT instrument,
+and writes a CRO-ready report (`.json` + `.md`) containing per-family success rates, the
+**undefended-vs-defended delta**, a **benign over-refusal** measurement, and an OWASP/NIST
+mapping stub.
+
+```
+python process_utils/robustness_eval.py \
+    --targets targets.example.json \
+    --attack-dir results/comet_run:comet_entanglement \
+    --attack-dir exports/mm_safetybench:mm_safetybench \
+    --transcripts exports/pyrit_crescendo.jsonl \
+    --benign-dir exports/benign_multimodal \
+    --judge-model openai/gpt-4o-mini \
+    --output reports/robustness_report
+```
+
+**Testing adaptive / multi-turn (Crescendo-style) attacks.** This harness does not generate or
+escalate attacks — it replays and scores fixed inputs. To exercise adaptive adversaries, run
+Microsoft **PyRIT** (multimodal orchestrators + Crescendo; see
+`../literature/06-tooling-and-governance.md`) under your own authorization, export the resulting
+attacker-turn transcripts as JSONL (schema: `transcripts.schema.example.jsonl`), and pass them
+via `--transcripts`. The adaptiveness lives in PyRIT; the harness measures the outcome. This
+keeps the methodology recognised, reproducible, and citable.
+
+See `AUDIT_NOTES.md` for the evaluation-integrity fixes the scoring depends on, and
+`PYRIT_INTEGRATION.md` for the end-to-end PyRIT → adapter → harness → report workflow
+(`tools/pyrit_export_adapter.py` converts PyRIT orchestrator output into the harness schema).
 
 ## Ethics & Safety
 - No hardcoded secrets; all API access via environment variables

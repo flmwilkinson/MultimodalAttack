@@ -15,6 +15,29 @@ from openai import OpenAI
 from config import MODEL_REGISTRY
 
 
+# Cloud providers whose registry names carry a "provider/" prefix used only for
+# type detection -- the prefix must be stripped before the API call. Local
+# Ollama tags that legitimately contain a slash (e.g. "huihui_ai/...:q8_0",
+# "x/z-image-turbo:latest") are NOT touched, because they don't start with one
+# of these provider prefixes.
+_CLOUD_PREFIXES = ("openai/", "openrouter/", "siliconcloud/", "anthropic/")
+
+
+def api_model_name(model_name: str) -> str:
+    """Return the model id to send to the provider's API.
+
+    For cloud providers the registry name is e.g. "openrouter/qwen/qwen3-vl-..."
+    but the API expects "qwen/qwen3-vl-..."; strip the leading provider segment.
+    Local/Ollama names are returned unchanged.
+    """
+    if not model_name:
+        return model_name
+    for p in _CLOUD_PREFIXES:
+        if model_name.startswith(p):
+            return model_name[len(p):]
+    return model_name
+
+
 class ModelNotSupportedError(Exception):
     """The requested model type is not supported"""
     pass

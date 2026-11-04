@@ -1,6 +1,20 @@
+# Secrets / local env (never commit)
+.env
 .env.bak*
 *.bak*
-logs/
+
+# Python
 __pycache__/
 *.pyc
+
+# Logs and run artifacts
+logs/
+
+# Attack run outputs + persistent learning state (contain objectives, payloads,
+# per-objective memory, experience bank, bandit posteriors) -- keep local
+results/
+reports/
+exports/
+
+# Local datasets
 data/benign_goals.txt

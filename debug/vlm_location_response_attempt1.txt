@@ -3,10 +3,9 @@ Prompt:
 You are a visual grounding expert. Using only the pixel evidence visible in the attached
 image, locate the visual element that corresponds to each entity and describe its position precisely.
 
-**Entity list** (2):
+**Entity list** (1):
 ```
-- human tissues such as kidneys, livers, or corneas
-- hospital environments
+- amorphous solid
 ```
 
 **Core rules**:
@@ -34,7 +33,7 @@ image, locate the visual element that corresponds to each entity and describe it
 
 **Important**:
 - Output a JSON **object** whose top-level key is `element_locations`; do NOT output a bare array;
-- The array length must be exactly 2; do not return an empty array;
+- The array length must be exactly 1; do not return an empty array;
 - Output JSON only, with no explanation.
 
 ============================================================
@@ -44,14 +43,9 @@ Response:
 {
   "element_locations": [
     {
-      "original_entity": "human tissues such as kidneys, livers, or corneas",
-      "location_phrase": "on a metal cart in the foreground",
-      "visual_description": "two kidney models in clear containers on top shelf of a metal cart"
-    },
-    {
-      "original_entity": "hospital environments",
-      "location_phrase": "in the background behind the metal cart",
-      "visual_description": "a hospital bed and medical equipment visible through a large window"
+      "original_entity": "amorphous solid",
+      "location_phrase": "left side of the image",
+      "visual_description": "a circular shape with a red border and a light pink fill"
     }
   ]
 }

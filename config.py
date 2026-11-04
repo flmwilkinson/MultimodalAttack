@@ -85,6 +85,11 @@ def _env_bool(key, default):
 
 OLLAMA_HOST = _env_str("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_BASE_URL = _env_str("OLLAMA_BASE_URL", f"{OLLAMA_HOST.rstrip('/')}/v1")
+# The OpenAI-compatible base URL must end with /v1 (Ollama serves the chat
+# endpoint at /v1/chat/completions). Auto-correct a common .env mistake where
+# OLLAMA_BASE_URL is set to the bare host without /v1 (causes 404 on calls).
+if not OLLAMA_BASE_URL.rstrip("/").endswith("/v1"):
+    OLLAMA_BASE_URL = OLLAMA_BASE_URL.rstrip("/") + "/v1"
 OLLAMA_API_KEY = _env_str("OLLAMA_API_KEY", "ollama")
 
 # Default models
@@ -249,7 +254,14 @@ MODEL_REGISTRY = {
         "siliconcloud/Qwen/Qwen3-VL-235B-A22B-Instruct",
         "siliconcloud/MiniMaxAI/MiniMax-M2",
     ],
-    "openrouter": ["openrouter/Qwen/Qwen3-VL-235B-A22B-Instruct"],
+    "openrouter": [
+        # Registered name = "openrouter/<exact OpenRouter model id>". The
+        # "openrouter/" prefix selects the provider; it is stripped before the
+        # API call (see process_utils/model_initializer.api_model_name), so the
+        # part after it must be the EXACT id from https://openrouter.ai/models .
+        "openrouter/openai/gpt-4o-mini",          # strong, cheap judge via OpenRouter
+        "openrouter/qwen/qwen3-vl-235b-a22b-instruct",  # large vision model (verify the slug on openrouter.ai)
+    ],
 }
 
 EVAL_MAX_TOKENS = _env_int("EVAL_MAX_TOKENS", 2048)
